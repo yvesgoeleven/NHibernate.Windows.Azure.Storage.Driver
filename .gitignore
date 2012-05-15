@@ -1,0 +1,6 @@
+
+src/_ReSharper.*
+src/Infrastructure/bin/
+src/Infrastructure/obj/
+*.suo
+src/packages
