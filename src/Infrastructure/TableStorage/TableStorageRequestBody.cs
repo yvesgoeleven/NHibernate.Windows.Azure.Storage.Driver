@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Data;
 using System.Xml.Linq;
@@ -24,7 +25,7 @@ namespace NHibernate.Drivers.Azure.TableStorage
                     new XAttribute(XNamespace.Xmlns + "m", StorageHttpConstants.Namespaces.MetaData),
 
                     new XElement(StorageHttpConstants.Namespaces.Atom + "title"),
-                    new XElement(StorageHttpConstants.Namespaces.Atom + "updated", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ")),
+                    new XElement(StorageHttpConstants.Namespaces.Atom + "updated", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ", CultureInfo.InvariantCulture)),
                     new XElement(StorageHttpConstants.Namespaces.Atom + "author",
                         new XElement(StorageHttpConstants.Namespaces.Atom + "name")
                     ),
