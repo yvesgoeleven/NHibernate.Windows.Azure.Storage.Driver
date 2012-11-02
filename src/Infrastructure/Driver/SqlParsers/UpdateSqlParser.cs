@@ -44,15 +44,17 @@ namespace NHibernate.Drivers.Azure.TableStorage
                 bodyParameters.Add(commandTextParts[i]);
             }
 
-            for (var i = whereIndex + 1; i < commandTextParts.Length; i += 4)
-            {
-                var part = commandTextParts[i];
-                var value = parameters[(i - 3)/3].Value.ToString();
-                requestParameters.Add( part + "=" + "'" + value + "'");
+            var rowKeyIndex = Array.FindIndex(commandTextParts, s => s == "RowKey");
+            var rowKeyValueIndex = commandTextParts[rowKeyIndex + 2];
+            var rowKeyValue = rowKeyValueIndex == "null" ? null : parameters[int.Parse(rowKeyValueIndex.TrimStart('p'))].Value.ToString();
+            requestParameters.Add("RowKey=" + "'" + rowKeyValue + "'");
+            rowKey = rowKeyValue;
 
-                if (part == "RowKey") rowKey = value;
-                if (part == "PartitionKey") partitionKey = value;
-            }
+            var partitionKeyIndex = Array.FindIndex(commandTextParts, s => s == "PartitionKey");
+            var partitionKeyValueIndex = commandTextParts[partitionKeyIndex + 2];
+            var partitionKeyValue = partitionKeyValueIndex == "null" ? null : parameters[int.Parse(partitionKeyValueIndex.TrimStart('p'))].Value.ToString();
+            requestParameters.Add("PartitionKey=" + "'" + partitionKeyValue + "'");
+            partitionKey = partitionKeyValue;
 
             var uri = String.Format(settings.Uri.AbsoluteUri + "{0}({1})", tableName, String.Join(",", requestParameters.ToArray()));
             
