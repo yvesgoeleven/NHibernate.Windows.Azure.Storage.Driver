@@ -24,13 +24,19 @@ namespace NHibernate.Drivers.Azure.TableStorage
         /// </summary>
         public TableStorageRequest GetTableStorageRequest(TableStorageSettings settings, DbParameterCollection parameters)
         {
-            var parameterNames = new string[parameters.Count];
-            for (var i = 0; i < parameterNames.Length; i++)
-            {
-                parameterNames[i] = commandTextParts[(i + 1) * 4];
-            }
+            var requestParameters = new List<string>();
 
-            var uri = String.Format(settings.Uri.AbsoluteUri + "{0}({1})", tableName, String.Join(",", parameterNames.Select((t, i) => t + "=" + "'" + parameters[i].Value + "'").ToArray()));
+            var rowKeyIndex = Array.FindIndex(commandTextParts, s => s == "RowKey");
+            var rowKeyValueIndex = commandTextParts[rowKeyIndex + 2];
+            var rowKeyValue = rowKeyValueIndex == "null" ? null : parameters[int.Parse(rowKeyValueIndex.TrimStart('p'))].Value.ToString();
+            requestParameters.Add("RowKey=" + "'" + rowKeyValue + "'");
+
+            var partitionKeyIndex = Array.FindIndex(commandTextParts, s => s == "PartitionKey");
+            var partitionKeyValueIndex = commandTextParts[partitionKeyIndex + 2];
+            var partitionKeyValue = partitionKeyValueIndex == "null" ? null : parameters[int.Parse(partitionKeyValueIndex.TrimStart('p'))].Value.ToString();
+            requestParameters.Add("PartitionKey=" + "'" + partitionKeyValue + "'");
+
+            var uri = String.Format(settings.Uri.AbsoluteUri + "{0}({1})", tableName, String.Join(",", requestParameters.ToArray()));
             var request = new TableStorageRequest(StorageHttpConstants.HttpMethod.Delete, uri, settings) { IfMatch = "*" };
             return request;
         }
